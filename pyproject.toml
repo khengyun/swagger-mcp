@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swagger-mcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "Automatically convert a Swagger/OpenAPI specification into an MCP server"
 authors = [{name = "Context Labs"}]
 readme = "README.md"
@@ -16,7 +16,7 @@ dependencies = [
     "fastmcp>=2.8.0",
     "fastapi",
     "uvicorn",
-    "jinja2",
+    "streamlit",
 ]
 
 [project.scripts]
@@ -27,7 +27,3 @@ swagger-mcp-ui = "swagger_mcp.ui_server:main"
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.package-data]
-"swagger_mcp" = [
-    "templates/*.html",
-]
