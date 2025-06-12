@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: Countries API
+  version: '1.0'
+paths:
+  /countries:
+    get:
+      operationId: listCountries
+      responses:
+        '200':
+          description: OK

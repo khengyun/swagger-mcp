@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: PokeAPI
+  version: '1.0'
+paths:
+  /pokemon:
+    get:
+      operationId: listPokemon
+      responses:
+        '200':
+          description: OK
