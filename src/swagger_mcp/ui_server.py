@@ -1,59 +1,81 @@
 from __future__ import annotations
 
+import threading
+
 import httpx
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from fastmcp.server.server import FastMCP
+import streamlit as st
+import uvicorn
+from fastapi import FastAPI
 from fastmcp.server.openapi import FastMCPOpenAPI
-from pathlib import Path
+from fastmcp.server.server import FastMCP
 
-app = FastAPI()
-templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
-
+# FastMCP manager that aggregates all running servers
 manager = FastMCP(name="swagger-mcp-ui")
 
-# Mount FastMCP HTTP interface under /mcp
-app.mount("/mcp", manager.http_app(path="/"))
+# FastAPI app exposing the manager's HTTP interface
+api_app = FastAPI()
+api_app.mount("/", manager.http_app(path="/"))
 
-# Keep track of mounted servers by prefix
+# Track mounted servers by prefix
 SERVERS: dict[str, FastMCPOpenAPI] = {}
 
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html", {"request": request, "servers": list(SERVERS.keys())}
+def _run_http_server() -> None:
+    """Run the FastMCP HTTP interface on port 8000 in a background thread."""
+    uvicorn.run(api_app, host="0.0.0.0", port=8000, log_level="info")
+
+
+def _ensure_http_server_running() -> None:
+    if "_http_thread" not in st.session_state:
+        thread = threading.Thread(target=_run_http_server, daemon=True)
+        thread.start()
+        st.session_state["_http_thread"] = thread
+
+
+def streamlit_app() -> None:
+    """Render the Streamlit UI for managing Swagger MCP servers."""
+    _ensure_http_server_running()
+
+    st.title("Swagger MCP UI")
+
+    st.subheader("Running Servers")
+    for name in list(SERVERS.keys()):
+        col1, col2 = st.columns([4, 1])
+        col1.write(name)
+        if col2.button("Stop", key=f"stop_{name}"):
+            server = SERVERS.pop(name)
+            manager.unmount(prefix=name)
+            st.experimental_rerun()
+
+    st.subheader("Add Server")
+    with st.form("add_server"):
+        name = st.text_input("Name")
+        spec = st.text_input("OpenAPI Spec URL or Path")
+        server_url = st.text_input("Server URL (optional)")
+        submitted = st.form_submit_button("Start")
+        if submitted:
+            client = (
+                httpx.AsyncClient(base_url=server_url)
+                if server_url
+                else httpx.AsyncClient()
+            )
+            server = FastMCPOpenAPI(openapi_spec=spec, client=client, name=name)
+            manager.mount(prefix=name, server=server)
+            SERVERS[name] = server
+            st.experimental_rerun()
+
+    st.markdown(
+        "The MCP HTTP API is available at [http://localhost:8000](http://localhost:8000)."
     )
 
 
-@app.post("/add", response_class=HTMLResponse)
-async def add_server(
-    request: Request,
-    name: str = Form(...),
-    spec: str = Form(...),
-    server_url: str | None = Form(None),
-):
-    client = httpx.AsyncClient(base_url=server_url) if server_url else httpx.AsyncClient()
-    server = FastMCPOpenAPI(openapi_spec=spec, client=client, name=name)
-    manager.mount(prefix=name, server=server)
-    SERVERS[name] = server
-    return RedirectResponse("/", status_code=303)
+def main() -> None:  # pragma: no cover - used as a console script
+    import streamlit.web.cli as stcli
+    import sys
+
+    sys.argv = ["streamlit", "run", __file__]
+    sys.exit(stcli.main())
 
 
-@app.post("/remove", response_class=HTMLResponse)
-async def remove_server(name: str = Form(...)):
-    server = SERVERS.pop(name, None)
-    if server:
-        manager.unmount(prefix=name)
-    return RedirectResponse("/", status_code=303)
-
-
-def main() -> None:
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual invocation
     main()
