@@ -411,3 +411,7 @@ To run the server with logs enabled, set the `REAL_LOGGER` environment variable 
 ```bash
 REAL_LOGGER=true swagger-mcp --spec http://localhost:9000/openapi.json --name product-mcp --server-url http://localhost:9000
 ```
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
