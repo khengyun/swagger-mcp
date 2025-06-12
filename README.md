@@ -37,6 +37,16 @@ Visit <http://localhost:9000/docs> to confirm the sample server is running.
 
 We'll use this sample server to show how to configure an MCP server in Windsurf. Make sure the sample server is running before following the Windsurf or Cursor instructions below.
 
+## Swagger MCP UI
+
+You can manage multiple Swagger MCP servers through a small web UI. Start the UI server:
+
+```bash
+swagger-mcp-ui
+```
+
+Open <http://localhost:8000> in your browser. Use the form to add a server by providing a name, the OpenAPI spec URL or path, and optionally a server URL. Running servers are listed on the page and can be stopped individually.
+
 ## Windsurf
 
 Start an MCP Server in Windsurf (`Windsurf Settings -> Settings -> Windsurf Settings -> Cascade -> Add Server -> Add Custom Server`):
