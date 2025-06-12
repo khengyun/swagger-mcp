@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swagger-mcp"
+version = "0.1.0"
+description = "Automatically convert a Swagger/OpenAPI specification into an MCP server"
+authors = [{name = "Context Labs"}]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "requests",
+    "PyYAML",
+    "mcp",
+]
+
+[project.scripts]
+swagger-mcp = "swagger_mcp.openapi_mcp_server:main"
+swagger-mcp-parse-dry-run = "swagger_mcp.parse_dry_run:main"
