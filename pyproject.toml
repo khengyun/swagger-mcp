@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swagger-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Automatically convert a Swagger/OpenAPI specification into an MCP server"
 authors = [{name = "Context Labs"}]
 readme = "README.md"
@@ -13,8 +13,21 @@ dependencies = [
     "requests",
     "PyYAML",
     "mcp",
+    "fastmcp>=2.8.0",
+    "fastapi",
+    "uvicorn",
+    "jinja2",
 ]
 
 [project.scripts]
 swagger-mcp = "swagger_mcp.openapi_mcp_server:main"
 swagger-mcp-parse-dry-run = "swagger_mcp.parse_dry_run:main"
+swagger-mcp-ui = "swagger_mcp.ui_server:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"swagger_mcp" = [
+    "templates/*.html",
+]
