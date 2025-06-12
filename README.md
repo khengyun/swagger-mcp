@@ -15,7 +15,7 @@ pipx install --force swagger-mcp
 Alternatively, install from source:
 
 ```bash
-git clone https://github.com/context-labs/swagger-mcp.git
+git clone https://github.com/khengyun/swagger-mcp.git
 cd swagger-mcp
 pipx install -e . --force
 ```
