@@ -70,11 +70,19 @@ def streamlit_app() -> None:
 
 
 def main() -> None:  # pragma: no cover - used as a console script
+    """Entry point for the ``swagger-mcp-ui`` console script."""
     import streamlit.web.cli as stcli
+    from streamlit.runtime.runtime import Runtime
     import sys
 
-    sys.argv = ["streamlit", "run", __file__]
-    sys.exit(stcli.main())
+    # If Streamlit is already running we are being executed within the
+    # Streamlit runtime, so just render the app. Otherwise, start Streamlit
+    # normally using its CLI helpers.
+    if Runtime.exists():
+        streamlit_app()
+    else:
+        sys.argv = ["streamlit", "run", __file__]
+        sys.exit(stcli.main())
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
